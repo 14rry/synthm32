@@ -88,9 +88,9 @@ static void ST7735_Select() {
 }
 
 void ST7735_Unselect() {
-    HAL_Delay(1); // give screen time to finish reading command
+    //HAL_Delay(1); // give screen time to finish reading command
     HAL_GPIO_WritePin(ST7735_CS_GPIO_Port, ST7735_CS_Pin, GPIO_PIN_SET);
-    HAL_Delay(1); // give screen time between commands
+    //HAL_Delay(1); // give screen time between commands
 
     /* without the HAL delay lines, the screen will occasionally stop
      * responding to commands and display all white

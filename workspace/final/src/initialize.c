@@ -9,6 +9,7 @@
 
 #include "stm32f1xx.h"
 #include "debug_utils.h"
+#include "initialize.h"
 
 
 void System_Clock_Init(void)
@@ -60,11 +61,12 @@ void configure_buttons(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-//    // Configure external push-buttons
-//    GPIO_InitStruct.Pin = BUTTON1 | BUTTON2 | BUTTON3;
-//    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING; // active low
-//    GPIO_InitStruct.Pull = GPIO_PULLUP;
-//    HAL_GPIO_Init(BUTTON_PORT, &GPIO_InitStruct);
+    // Configure external push-buttons
+    GPIO_InitStruct.Pin = BUTTON_UP_PIN | BUTTON_DOWN_PIN | BUTTON_LEFT_PIN |
+            BUTTON_RIGHT_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING; // active low
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    HAL_GPIO_Init(BUTTON_PORT, &GPIO_InitStruct);
 }
 
 void configure_LEDs(void)
@@ -108,14 +110,14 @@ void GPIO_Init(void)
     //configure_LEDs();
 
     // Set up interrupts
-    HAL_NVIC_SetPriority(EXTI15_10_IRQn,0,0); // blue button
-//    HAL_NVIC_SetPriority(EXTI3_IRQn,2,0); // button 1
-//    HAL_NVIC_SetPriority(EXTI4_IRQn,1,0); // button 3
-//    HAL_NVIC_SetPriority(EXTI2_IRQn,3,0); // button 2
+    HAL_NVIC_SetPriority(EXTI15_10_IRQn,0,0); // blue button and left
+    HAL_NVIC_SetPriority(EXTI3_IRQn,2,0); // right
+    HAL_NVIC_SetPriority(EXTI4_IRQn,1,0); // down
+    HAL_NVIC_SetPriority(EXTI9_5_IRQn,3,0); // up
 
     HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-//    HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-//    HAL_NVIC_EnableIRQ(EXTI4_IRQn);
-//    HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+    HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+    HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+    HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 }
 

@@ -63,7 +63,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = SS_PIN | DATA_CONTROL_PIN;
+    GPIO_InitStruct.Pin = SS_PIN | DATA_CONTROL_PIN | RESET_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -146,19 +146,19 @@ void ST7735_Write_Command(uint8_t command)
 /*
  * GPIO INTERRUPT CALLBACK FUNCTION
  */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-    // blue onboard button
-    if (GPIO_Pin == GPIO_PIN_13)
-    {
-        // toggle LCD backlight brightness
-        if (htim_pwm.Instance->CCR2 == TIM2_LCD_PULSE_DIM)
-        {
-            __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, TIM2_LCD_PULSE_BRIGHT);
-        }
-        else
-        {
-            __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, TIM2_LCD_PULSE_DIM);
-        }
-    }
-}
+//void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+//{
+//    // blue onboard button
+//    if (GPIO_Pin == GPIO_PIN_13)
+//    {
+//        // toggle LCD backlight brightness
+//        if (htim_pwm.Instance->CCR2 == TIM2_LCD_PULSE_DIM)
+//        {
+//            __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, TIM2_LCD_PULSE_BRIGHT);
+//        }
+//        else
+//        {
+//            __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, TIM2_LCD_PULSE_DIM);
+//        }
+//    }
+//}

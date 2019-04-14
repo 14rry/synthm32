@@ -18,6 +18,7 @@
 #include "uart.h"
 #include "debug_utils.h"
 #include "timer.h"
+#include "initialize.h"
 
 
 
@@ -48,24 +49,29 @@ void SysTick_Handler(void)
 
 void EXTI15_10_IRQHandler(void)
 {
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13); // blue button
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_10); // left
 }
 
 //void EXTI2_IRQHandler(void)
 //{
 //    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
 //}
-//
-//void EXTI3_IRQHandler(void)
-//{
-//    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
-//}
-//
-//void EXTI4_IRQHandler(void)
-//{
-//    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
-//}
-//
+
+void EXTI3_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3); // right
+}
+
+void EXTI4_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4); // down
+}
+
+void EXTI9_5_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5); // up
+}
+
 ////void USART1_IRQHandler(void)
 ////{
 ////    HAL_UART_IRQHandler(&HUART1);

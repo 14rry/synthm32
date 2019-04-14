@@ -27,6 +27,8 @@
 #include "fonts.h"
 #include "testimg.h"
 
+#include "GUI.h"
+
 //#define LOOPBACK_TEST
 
 
@@ -49,7 +51,9 @@ int main(void)
 
     ST7735_FillScreen(ST7735_BLACK);
 
-    void loop() {
+    Display_Main_Menu();
+
+    void graphics_test() {
         // Check border
         ST7735_FillScreen(ST7735_BLACK);
 
@@ -108,7 +112,8 @@ int main(void)
 
     while (1)
     {
-        loop();
+        //graphics_test();
+        Check_GUI_Buttons(HAL_GetTick());
     }
 
 } // end main
