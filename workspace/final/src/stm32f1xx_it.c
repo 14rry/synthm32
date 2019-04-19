@@ -49,7 +49,27 @@ void SysTick_Handler(void)
 
 void EXTI15_10_IRQHandler(void)
 {
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_10); // left
+    if (HAL_GPIO_ReadPin(BUTTON_PORT,BUTTON_RIGHT_PIN) == 0)
+    {
+        HAL_GPIO_EXTI_IRQHandler(BUTTON_RIGHT_PIN);
+    }
+    else if (HAL_GPIO_ReadPin(BUTTON_PORT,BUTTON_UP_PIN) == 0)
+    {
+        HAL_GPIO_EXTI_IRQHandler(BUTTON_UP_PIN);
+    }
+    else if (HAL_GPIO_ReadPin(BUTTON_PORT,BUTTON_DOWN_PIN) == 0)
+    {
+        HAL_GPIO_EXTI_IRQHandler(BUTTON_DOWN_PIN);
+    }
+    else
+    {
+        // clear all irqs
+        __HAL_GPIO_EXTI_CLEAR_IT(BUTTON_RIGHT_PIN);
+        __HAL_GPIO_EXTI_CLEAR_IT(BUTTON_UP_PIN);
+        __HAL_GPIO_EXTI_CLEAR_IT(BUTTON_DOWN_PIN);
+    }
+
+    //HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_10); // blue, right, up, down
 }
 
 //void EXTI2_IRQHandler(void)
@@ -57,20 +77,20 @@ void EXTI15_10_IRQHandler(void)
 //    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
 //}
 
-void EXTI3_IRQHandler(void)
+void EXTI2_IRQHandler(void)
 {
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3); // right
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2); // left
 }
 
-void EXTI4_IRQHandler(void)
-{
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4); // down
-}
-
-void EXTI9_5_IRQHandler(void)
-{
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5); // up
-}
+//void EXTI4_IRQHandler(void)
+//{
+//    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4); // down
+//}
+//
+//void EXTI1_IRQHandler(void)
+//{
+//    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1); // up
+//}
 
 ////void USART1_IRQHandler(void)
 ////{

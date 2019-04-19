@@ -11,11 +11,12 @@
 #define INITIALIZE_H_
 
 
-#define BUTTON_UP_PIN GPIO_PIN_5
-#define BUTTON_DOWN_PIN GPIO_PIN_4
-#define BUTTON_LEFT_PIN GPIO_PIN_10
-#define BUTTON_RIGHT_PIN GPIO_PIN_3
-#define BUTTON_PORT GPIOB
+#define BUTTON_UP_PIN GPIO_PIN_11
+#define BUTTON_DOWN_PIN GPIO_PIN_12
+#define BUTTON_LEFT_PIN GPIO_PIN_2
+#define BUTTON_RIGHT_PIN GPIO_PIN_10
+#define BUTTON_PORT GPIOC
+#define BUTTON_LEFT_PORT GPIOD
 
 /**
  * @brief Initialize clock settings as defined in the lab assignment.

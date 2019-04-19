@@ -42,12 +42,12 @@ int main(void)
     System_Clock_Init();
     SPI_Init();
     GPIO_Init(); // enable push buttons
-    UART2_Init(); // used to print debug messages on serial port
+    //UART2_Init(); // used to print debug messages on serial port
     Timer_Init(); // used for rotary encoder, PWM for DAC, and periodic timer
 
     ST7735_Init();
 
-    debug_printf(&HUART2, "Program started %d \n\r",0);
+    //debug_printf(&HUART2, "Program started %d \n\r",0);
 
     ST7735_FillScreen(ST7735_BLACK);
 
