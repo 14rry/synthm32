@@ -10,6 +10,7 @@
 #include <string.h>
 #include "initialize.h"
 #include "sig_gen.h"
+#include "graphics_ext.h"
 
 #define MENU_PAD (8)
 #define MENU_HEIGHT (56)
@@ -25,9 +26,8 @@ uint32_t ButtonDownTime = 0; /**< time of interrupt hit */
 uint32_t ButtonLeftTime = 0; /**< time of interrupt hit */
 uint32_t ButtonRightTime = 0;
 
-// internal function prototypes
 void Clear_Menu_Area();
-void Display_Unfilled_Rectangle(uint16_t x,uint16_t y,uint16_t w,uint16_t h,uint16_t color);
+void Backward_Menu();
 
 enum Menus { main, synth, oscope };
 enum Menus CurrentMenu = main;
@@ -43,17 +43,22 @@ void Display_Main_Menu()
     // Menu selections
     ST7735_WriteString(MENU_PAD, 10, "Synth Settings", Font_7x10, MENU_FG,
             MENU_BG);
-    ST7735_WriteString(MENU_PAD, 20, "Oscilloscope", Font_7x10, MENU_FG,
+    ST7735_WriteString(MENU_PAD, 20, "Graphics Demo", Font_7x10, MENU_FG,
             MENU_BG);
-    ST7735_WriteString(MENU_PAD, 30, "Sequencer", Font_7x10, MENU_FG,
+    ST7735_WriteString(MENU_PAD, 30, "Custom Functions", Font_7x10, MENU_FG,
             MENU_BG);
+    ST7735_WriteString(MENU_PAD, 40, "Toggle Backlight", Font_7x10, MENU_FG,
+                MENU_BG);
+
 
     Min_Sel = 1;
-    Max_Sel = 3;
+    Max_Sel = 4;
     Menu_Selection = 1;
     Display_Menu_Cursor();
 
     CurrentMenu = main;
+
+    Display_Waveform_GUI();
 }
 
 void Display_Synth_Menu()
@@ -65,11 +70,11 @@ void Display_Synth_Menu()
             MENU_BG);
 
     // Menu selections
-    ST7735_WriteString(MENU_PAD, 10, "Waveform: Sine", Font_7x10, MENU_FG,
+    ST7735_WriteString(MENU_PAD, 10, "Waveform", Font_7x10, MENU_FG,
             MENU_BG);
-    ST7735_WriteString(MENU_PAD, 20, "Amplitude: 10", Font_7x10, MENU_FG,
+    ST7735_WriteString(MENU_PAD, 20, "Amplitude", Font_7x10, MENU_FG,
             MENU_BG);
-    ST7735_WriteString(MENU_PAD, 30, "Release: 10", Font_7x10, MENU_FG,
+    ST7735_WriteString(MENU_PAD, 30, "Release", Font_7x10, MENU_FG,
             MENU_BG);
     ST7735_WriteString(MENU_PAD, 40, "Return to MAIN", Font_7x10, MENU_FG,
             MENU_BG);
@@ -80,6 +85,16 @@ void Display_Synth_Menu()
     Display_Menu_Cursor();
 
     CurrentMenu = synth;
+}
+
+void Display_Waveform_GUI()
+{
+
+    Display_Waveform(0,
+            MENU_HEIGHT+1,
+            ST7735_WIDTH-1,
+            ST7735_HEIGHT-1);
+
 }
 
  void Display_Menu_Cursor()
@@ -129,6 +144,20 @@ void Display_Synth_Menu()
               {
                   Display_Synth_Menu();
               }
+              else if (Menu_Selection == 2)
+              {
+                  graphics_test();
+                  Display_Main_Menu();
+              }
+              else if (Menu_Selection == 3)
+              {
+                  Graphics_Demo();
+                  Display_Main_Menu();
+              }
+              else if (Menu_Selection == 4)
+              {
+                  Toggle_LCD_Brightness();
+              }
               break;
           case synth:
               if (Menu_Selection == 1)
@@ -136,7 +165,8 @@ void Display_Synth_Menu()
                   Change_Selected_Signal();
                   ST7735_FillRectangle(0,MENU_HEIGHT+2,64,
                           (ST7735_HEIGHT-MENU_HEIGHT-2)/2,ST7735_BLACK);
-                  Display_Waveform();
+
+                  Display_Waveform_GUI();
               }
               else if (Menu_Selection == 4)
               {
@@ -168,84 +198,6 @@ void Display_Synth_Menu()
      }
  }
 
- void Display_Waveform()
- {
-     // draw outline
-     Display_Unfilled_Rectangle(0,MENU_HEIGHT+1,ST7735_WIDTH-1,
-             ST7735_HEIGHT-1,ST7735_WHITE);
-
-     // draw actual waveform from buffer data
-
-     // interpolate buffer to fit number of display points
-     //int skip_size = NUM_SAMPLES/(ST7735_WIDTH-2);
-     int repeat_amount = (ST7735_WIDTH-2)/NUM_SAMPLES;
-     repeat_amount = 1;
-     int display_x = 0;
-     int wave_height = (ST7735_HEIGHT-MENU_HEIGHT-3)/2;
-     int prev_y = -1;
-     for (int j = 0; j < 2; j++)
-     {
-         for (int i = 0; i < NUM_SAMPLES; i++)
-         {
-             int display_y;
-             switch(Selected_Signal)
-             {
-                 case Sine:
-                     display_y = (SineBuffer[i]/(AMPLITUDE*2.0f)) * wave_height
-                         + MENU_HEIGHT + 2;
-                     break;
-                 case Triangle:
-                     display_y = (TriangleBuffer[i]/(AMPLITUDE*2.0f)) * wave_height
-                         + MENU_HEIGHT + 2;
-                     break;
-                 case Square:
-                     display_y = (SquareBuffer[i]/(AMPLITUDE*2.0f)) * wave_height
-                         + MENU_HEIGHT + 2;
-                     break;
-                 default:
-                     display_y = 0;
-                     break;
-             }
-
-             if (prev_y > 0)
-             {
-                 if (display_y > prev_y)
-                 {
-                     ST7735_FillRectangle(display_x,prev_y,1,display_y-prev_y,ST7735_CYAN);
-                 }
-                 else if (display_y == prev_y)
-                 {
-                     ST7735_DrawPixel(display_x,display_y,ST7735_CYAN);
-                 }
-                 else
-                 {
-                     ST7735_FillRectangle(display_x,display_y,1,prev_y-display_y,ST7735_CYAN);
-                 }
-             }
-             else
-             {
-                 ST7735_DrawPixel(display_x,display_y,ST7735_CYAN);
-             }
-
-             //ST7735_FillRectangle(display_x,display_y,repeat_amount,1,ST7735_CYAN);
-             display_x += repeat_amount;
-             prev_y = display_y;
-         }
-     }
-
-
- }
-
- void Display_Unfilled_Rectangle(uint16_t x,uint16_t y,uint16_t x2,uint16_t y2,uint16_t color)
- {
-     // horizontal
-     ST7735_FillRectangle(x,y,x2,1,color);
-     ST7735_FillRectangle(x,y2,x2,1,color);
-
-     // vertical
-     ST7735_FillRectangle(x,y,1,y2,color);
-     ST7735_FillRectangle(x2,y,1,y2,color);
- }
 
  // GPIO FUNCTIONS
 
@@ -299,8 +251,6 @@ void Display_Synth_Menu()
          }
      }
  }
-
-
 
  void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
  {
