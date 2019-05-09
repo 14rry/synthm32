@@ -79,7 +79,17 @@ void EXTI15_10_IRQHandler(void)
 
 void EXTI2_IRQHandler(void)
 {
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2); // left
+//    if (HAL_GPIO_ReadPin(BUTTON_LEFT_PORT,BUTTON_LEFT_PIN) == 0)
+//    {
+//        HAL_GPIO_EXTI_IRQHandler(BUTTON_LEFT_PIN);
+//    }
+//    else
+//    {
+//        // clear irqs
+//        __HAL_GPIO_EXTI_CLEAR_IT(BUTTON_LEFT_PIN);
+//    }
+    __HAL_GPIO_EXTI_CLEAR_IT(BUTTON_LEFT_PIN);
+
 }
 
 //void EXTI4_IRQHandler(void)
@@ -97,8 +107,8 @@ void EXTI2_IRQHandler(void)
 ////    HAL_UART_IRQHandler(&HUART1);
 ////}
 //
-//void TIM4_IRQHandler(void)
-//{
-//    HAL_TIM_IRQHandler(&htim_periodic);
-//}
+void TIM4_IRQHandler(void)
+{
+    HAL_TIM_IRQHandler(&htim_periodic);
+}
 

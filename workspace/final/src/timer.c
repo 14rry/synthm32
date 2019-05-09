@@ -9,9 +9,11 @@
 #include "debug_utils.h"
 #include "uart.h"
 #include "timer.h"
+#include "sig_gen.h"
 
 #define TIM2_TICK_FREQ (64000000) /*< Timer 4 tick frequency, configured in initialize.c */
 #define TIM2_PERIOD (1279) /*< Period that gives a 50kHz timer rate. Works well with DAC */
+#define TIM2_PULSE (319) /*< Initialize with 25% duty cycle */
 
 // GLOBALS
 volatile uint32_t EncoderCount = 0;
@@ -24,6 +26,34 @@ void Timer_Init()
     //Initialize_Periodic_Timer();
     //Initialize_Encoder_Timer();
     Initialize_PWM_Timer();
+}
+
+void Initialize_Periodic_Timer()
+{
+    // initialize a 0.1 ms second timer
+    TIM_HandleTypeDef *htimPtr = &htim_periodic;
+
+    htimPtr->Instance = TIM4;
+    htimPtr->Init.Prescaler = 63;
+    htimPtr->Init.CounterMode = TIM_COUNTERMODE_UP;
+    htimPtr->Init.Period = C1;
+
+    //htimPtr->State = HAL_TIM_STATE_RESET;
+
+    if (!HAL_TIM_Base_Init (htimPtr) == HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    TIM_ClockConfigTypeDef clockConfig = {0};
+    clockConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+
+    if (!HAL_TIM_ConfigClockSource(htimPtr,&clockConfig) == HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    HAL_TIM_Base_Start_IT(htimPtr);
 }
 
 
@@ -48,7 +78,7 @@ void Initialize_PWM_Timer()
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
     HAL_TIMEx_MasterConfigSynchronization(&htim_pwm, &sMasterConfig);
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse = TIM2_LCD_PULSE_BRIGHT;
+    sConfigOC.Pulse = TIM2_PULSE;
     sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
     HAL_TIM_PWM_ConfigChannel(&htim_pwm, &sConfigOC, TIM_CHANNEL_1);
@@ -132,8 +162,8 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef* htim)
         timer3_IO_init.Pull = GPIO_NOPULL;
         HAL_GPIO_Init(GPIOA, &timer3_IO_init);
 
-        HAL_NVIC_SetPriority(TIM3_IRQn,0,0);
-        HAL_NVIC_EnableIRQ(TIM3_IRQn);
+        //HAL_NVIC_SetPriority(TIM3_IRQn,0,0);
+        //HAL_NVIC_EnableIRQ(TIM3_IRQn);
     }
 }
 

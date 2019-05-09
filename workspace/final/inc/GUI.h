@@ -23,6 +23,7 @@ void Display_Menu(char * items, int num);
 void Display_Menu_Cursor(void);
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 void Check_GUI_Buttons(uint32_t currentTime);
+void Display_Waveform();
 
 
 #endif /* GUI_H_ */
