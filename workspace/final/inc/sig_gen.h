@@ -52,6 +52,8 @@
 #define F2 (44)  /**< ARR for F2 */
 #define G2 (39)  /**< ARR for G2 */
 
+
+
 #define SCALE_LENGTH (15) /**< The number of values in the predefined scale */
 
 #define NUM_SAMPLES (32) /**< Number of analog voltages to calcaulte for each waveform */
