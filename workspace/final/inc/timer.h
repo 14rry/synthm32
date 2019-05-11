@@ -9,6 +9,7 @@
 #define TIMER_H_
 
 #define TIM2_LCD_PULSE_DIM (300) /*< Initialize with 25% duty cycle */
+#define TIM2_LCD_Pulse_DIM_2 (700)
 #define TIM2_LCD_PULSE_BRIGHT (1279)
 
 TIM_HandleTypeDef htim_periodic; // handle for periodic timer

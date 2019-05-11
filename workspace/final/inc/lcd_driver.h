@@ -36,5 +36,7 @@ void LCDWrite(uint8_t, uint8_t*, int);
 void LCDWrite16(uint8_t, uint16_t*, int);
 void ST7735_Write_Command(uint8_t);
 void Loopback_Test(uint8_t Data_Control_n, uint8_t* data, int numBytes);
+void Toggle_LCD_Brightness();
+
 
 #endif /* LCD_DRIVER_H_ */

@@ -22,6 +22,7 @@
 
 UART_HandleTypeDef HUART1;
 UART_HandleTypeDef HUART2;
+UART_HandleTypeDef HUART3;
 
 uint8_t Buffer[8];
 
@@ -72,6 +73,27 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
     }
+
+    else if(huart->Instance == USART3)
+    {
+        __HAL_RCC_USART3_CLK_ENABLE();
+        __HAL_RCC_GPIOB_CLK_ENABLE();
+
+        /**USART3 GPIO Configuration
+        PB10     ------> USART3_TX
+        PB11     ------> USART3_RX
+        */
+
+        GPIO_InitStruct.Pin = GPIO_PIN_10;
+        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+        HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+        GPIO_InitStruct.Pin = GPIO_PIN_11;
+        GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    }
 }
 
 void UART2_Init(void)
@@ -91,6 +113,29 @@ void UART2_Init(void)
     {
         Error_Handler();
     }
+}
+
+void UART3_Init(void)
+{
+    // based on example from https://visualgdb.com/tutorials/arm/stm32/uart/hal/
+    HUART3.Instance = USART3;
+    HUART3.Init.BaudRate = 115200;
+    HUART3.Init.WordLength = UART_WORDLENGTH_8B;
+    HUART3.Init.StopBits = UART_STOPBITS_1;
+    HUART3.Init.Parity = UART_PARITY_NONE;
+    HUART3.Init.Mode = UART_MODE_TX_RX;
+    HUART3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+
+    HUART3.gState = HAL_UART_STATE_RESET;
+
+    if (HAL_UART_Init(&HUART3) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    // Enable Interrupt
+    HAL_NVIC_SetPriority(USART3_IRQn,4,0);
+    HAL_NVIC_EnableIRQ(USART3_IRQn);
 }
 
 void UART1_Init(void)
@@ -117,6 +162,7 @@ void UART1_Init(void)
     HAL_UART_Receive_IT(&HUART1, Buffer, HEADER_SIZE);
 }
 
+
 void send_ack(void)
 {
     uint8_t ack[7] = {0x1A, 0xCF, 0xFC, 0x1D, 0x07, 0xFF, 0xCC};
@@ -129,56 +175,7 @@ void send_nack(void)
     HAL_UART_Transmit_IT(&HUART1, nack, sizeof(nack));
 }
 
-void run_command(uint8_t command)
-{
-    switch(command)
-    {
-        case 0x01:
-            Increment_Count();
-            break;
-        case 0x02:
-            Decrement_Count();
-            break;
-        case 0x04:
-            Reset_Count();
-            break;
-        case 0x05:
-            Start_Autocount();
-            break;
-        case 0x06:
-            Stop_Autocount();
-            break;
-        case 0x08:
-            Reverse_Count_Direction();
-            break;
-        default:
-            send_nack(); // command not recognized
-    }
 
-    send_ack(); // success
-}
-
-void run_command_with_argument(uint8_t command, uint8_t arg)
-{
-    int result = 0;
-    switch(command)
-    {
-        case 0x03:
-            result = Set_Count(arg);
-            break;
-        case 0x07:
-            result = Set_Count_Delay(arg);
-            break;
-    }
-    if (result == 1)
-    {
-        send_ack(); //success
-    }
-    else
-    {
-        send_nack();
-    }
-}
 
 volatile int RxState = READ_HEADER;
 
@@ -226,52 +223,52 @@ uint8_t calculate_checksum()
     return checksum;
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if (RxState == READ_HEADER)
-    {
-        read_header();
-    }
-    else if (RxState == READ_SHORT_MESSAGE)
-    {
-        if (calculate_checksum() == Buffer[6])
-        {
-            // execute command based on Buffer
-            run_command(Buffer[5]);
-        }
-        else
-        {
-            // invalid checksum
-            send_nack();
-        }
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+////    if (RxState == READ_HEADER)
+////    {
+////        read_header();
+////    }
+////    else if (RxState == READ_SHORT_MESSAGE)
+////    {
+////        if (calculate_checksum() == Buffer[6])
+////        {
+////            // execute command based on Buffer
+////            run_command(Buffer[5]);
+////        }
+////        else
+////        {
+////            // invalid checksum
+////            send_nack();
+////        }
+////
+////        RxState = READ_HEADER; // start listening for header again
+////        HAL_UART_Receive_IT(&HUART1, Buffer, HEADER_SIZE); // listen again
+////    }
+////    else if (RxState == READ_LONG_MESSAGE)
+////    {
+////        if (calculate_checksum() == Buffer[7])
+////        {
+////            run_command_with_argument(Buffer[5],Buffer[6]);
+////        }
+////        else
+////        {
+////            // invalid checksum
+////            send_nack();
+////        }
+////
+////        RxState = READ_HEADER; // start listening for header again
+////        HAL_UART_Receive_IT(&HUART1, Buffer, HEADER_SIZE); // listen again
+////    }
+//}
 
-        RxState = READ_HEADER; // start listening for header again
-        HAL_UART_Receive_IT(&HUART1, Buffer, HEADER_SIZE); // listen again
-    }
-    else if (RxState == READ_LONG_MESSAGE)
-    {
-        if (calculate_checksum() == Buffer[7])
-        {
-            run_command_with_argument(Buffer[5],Buffer[6]);
-        }
-        else
-        {
-            // invalid checksum
-            send_nack();
-        }
-
-        RxState = READ_HEADER; // start listening for header again
-        HAL_UART_Receive_IT(&HUART1, Buffer, HEADER_SIZE); // listen again
-    }
-}
-
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
-{
-    send_nack();
-
-    RxState = READ_HEADER;
-    HAL_UART_Receive_IT(&HUART1, Buffer, HEADER_SIZE); // listen again
-}
+//void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+//{
+//    send_nack();
+//
+//    RxState = READ_HEADER;
+//    HAL_UART_Receive_IT(&HUART1, Buffer, HEADER_SIZE); // listen again
+//}
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
