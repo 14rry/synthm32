@@ -30,6 +30,7 @@
 #include "GUI.h"
 #include "sig_gen.h"
 
+#include "MIDI.h"
 
 /**
  * @brief Initializes board clock, GPIO, UART 2, and signal generator.
@@ -41,23 +42,23 @@ int main(void)
     System_Clock_Init();
     SPI_Init();
     GPIO_Init(); // enable push buttons
-    UART2_Init(); // used to print debug messages on serial port
+
+    UART2_Init(); // used to print debug message on serial port
+    UART3_Init(); // used to communicate with FTDI breakout board
+    MIDI_Init();
+
     Timer_Init(); // used for rotary encoder, PWM for DAC, and periodic timer
 
     ST7735_Init();
     Initialize_Sig_Gen();
 
-
-    //debug_printf(&HUART2, "Program started %d \n\r",0);
+    debug_printf(&HUART2, "Program started %d \n\r",0);
 
     ST7735_FillScreen(ST7735_BLACK);
-
     Display_Main_Menu();
-    Display_Waveform();
 
     while (1)
     {
-        //graphics_test();
         Check_GUI_Buttons(HAL_GetTick());
     }
 

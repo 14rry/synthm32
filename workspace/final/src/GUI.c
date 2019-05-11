@@ -11,6 +11,7 @@
 #include "initialize.h"
 #include "sig_gen.h"
 #include "graphics_ext.h"
+#include "lcd_driver.h"
 
 #define MENU_PAD (8)
 #define MENU_HEIGHT (56)

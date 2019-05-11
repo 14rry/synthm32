@@ -11,8 +11,11 @@
 #ifndef UART_H_
 #define UART_H_
 
+#include "stm32f1xx_hal.h"
+
 UART_HandleTypeDef HUART1; /**< UART_HandleTypeDef HUART1 */
 UART_HandleTypeDef HUART2; /**< UART_HandleTypeDef HUART2 */
+UART_HandleTypeDef HUART3;
 
 /**
  * @brief Initializes GPIO pins for UART1 or 2
@@ -44,6 +47,8 @@ UART_HandleTypeDef UART1_Init(void);
  * @return
  */
 UART_HandleTypeDef UART2_Init(void);
+
+UART_HandleTypeDef UART3_Init(void);
 
 /**
  * @brief callback handler for successful UART receive

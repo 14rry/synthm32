@@ -23,7 +23,7 @@ volatile int PeriodicTimerFlag = 0;
 
 void Timer_Init()
 {
-    //Initialize_Periodic_Timer();
+    Initialize_Periodic_Timer();
     //Initialize_Encoder_Timer();
     Initialize_PWM_Timer();
 }

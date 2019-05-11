@@ -143,6 +143,23 @@ void ST7735_Write_Command(uint8_t command)
 }
 
 
+void Toggle_LCD_Brightness()
+{
+    // toggle LCD backlight brightness
+    if (htim_pwm.Instance->CCR2 == TIM2_LCD_PULSE_DIM)
+    {
+        __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, TIM2_LCD_Pulse_DIM_2);
+    }
+    else if (htim_pwm.Instance->CCR2 == TIM2_LCD_Pulse_DIM_2)
+    {
+        __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, TIM2_LCD_PULSE_BRIGHT);
+    }
+    else
+    {
+        __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, TIM2_LCD_PULSE_DIM);
+    }
+}
+
 /*
  * GPIO INTERRUPT CALLBACK FUNCTION
  */
