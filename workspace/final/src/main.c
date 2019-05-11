@@ -48,9 +48,9 @@ int main(void)
     MIDI_Init();
 
     Timer_Init(); // used for rotary encoder, PWM for DAC, and periodic timer
+    Initialize_Sig_Gen();
 
     ST7735_Init();
-    Initialize_Sig_Gen();
 
     debug_printf(&HUART2, "Program started %d \n\r",0);
 

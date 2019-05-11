@@ -44,14 +44,6 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef* htim);
 void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim);
 
 /**
- * @brief Callback function linked to periodic timer interrupt trigger
- *
- * Raises periodic timer flag that tells main loop to update analog voltage level
- * @param htim handle to periodic timer
- */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim);
-
-/**
  * @brief Initialize periodic timer for use with DAC
  */
 void Initialize_Periodic_Timer();

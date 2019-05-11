@@ -19,49 +19,116 @@ int SquareBuffer[NUM_SAMPLES];
 int CurrentNoteIndex = 3; // starts on c1
 int MajorScale[15] = {G0,A0,B0,C1,D1,E1,F1,G1,A1,B1,C2,D2,E2,F2,G2};
 
+uint32_t NoteOnTime_mS = 0;
+uint32_t NoteOffTime_mS = 0;
+int IsNoteOn = 0;
+
+// FUNCTION PROTOTYPES
+int apply_ADSR(int);
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
+{
+    Update_Output_Signal();
+
+
+}
+
 void Initialize_Sig_Gen()
 {
     Calculate_Buffers();
     Selected_Signal = Sine;
 
-    // light up LED1 to show that sine is selected
-//    HAL_GPIO_WritePin(ULED1_PORT, ULED1, 1);
-//    HAL_GPIO_WritePin(ULED2_PORT, ULED2, 0);
-//    HAL_GPIO_WritePin(ULED3_PORT, ULED3, 0);
-
     SignalIndex = 0;
 
     // initialize the periodic timer for the first sine note
     __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, SineBuffer[SignalIndex]);
+
+    HAL_TIM_Base_Start_IT(&htim_periodic); // wavetable timer
 }
 
 void Update_Output_Signal()
 {
-    if (PeriodicTimerFlag)
+    // go to next signal sample
+    SignalIndex++;
+    if (SignalIndex >= NUM_SAMPLES)
     {
-        // go to next signal sample
-        SignalIndex++;
-        if (SignalIndex >= NUM_SAMPLES)
-        {
-            SignalIndex = 0;
-        }
-
-        if (Selected_Signal == Sine)
-        {
-            __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, SineBuffer[SignalIndex]);
-        }
-        else if (Selected_Signal == Triangle)
-        {
-            __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, TriangleBuffer[SignalIndex]);
-        }
-        else if (Selected_Signal == Square)
-        {
-            __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, SquareBuffer[SignalIndex]);
-        }
-
-        PeriodicTimerFlag = 0; // reset flag
+        SignalIndex = 0;
     }
 
+    int amplitude = 0;
+
+    if (Selected_Signal == Sine)
+    {
+        amplitude = SineBuffer[SignalIndex];
+    }
+    else if (Selected_Signal == Triangle)
+    {
+        amplitude = TriangleBuffer[SignalIndex];
+    }
+    else if (Selected_Signal == Square)
+    {
+        amplitude = SquareBuffer[SignalIndex];
+    }
+
+    amplitude = apply_ADSR(amplitude);
+
+    __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, amplitude);
+
+
+}
+
+int apply_ADSR(int amp)
+{
+    float outAmp = (float) amp;
+    if (IsNoteOn == 1)
+    {
+        uint32_t delta_time_mS = HAL_GetTick() - NoteOnTime_mS;
+
+        if (delta_time_mS < ATTACK_mS)
+        {
+            // linear slope from 0 to MAX_AMP
+            outAmp = ((float)amp/(float)ATTACK_mS)*(float)delta_time_mS;
+        }
+    }
+    else if (IsNoteOn == 0 && NoteOffTime_mS > 0) // note off
+    {
+        uint32_t delta_time_mS = HAL_GetTick() - NoteOffTime_mS;
+
+        if (delta_time_mS < RELEASE_mS)
+        {
+            outAmp = ((-(float)amp/(float)RELEASE_mS)*(float)delta_time_mS)+amp;
+        }
+        else
+        {
+            outAmp = 0; // release has elapsed, kill output
+        }
+    }
+
+    return (int)outAmp;
+}
+
+void Note_On(uint note_val)
+{
+    if (note_val >= SCALE_LENGTH)
+    {
+        return; // note not defined, do nothing
+    }
+
+    // change timer frequency to match note_val
+    uint32_t newARR = MajorScale[note_val];
+    __HAL_TIM_SET_AUTORELOAD(&htim_periodic,newARR);
+    //debug_printf(&HUART2, "Changed note to: %d \n\r",newARR);
+
+    // update time for ADSR envelope
+    NoteOnTime_mS = HAL_GetTick();
+    IsNoteOn = 1;
+
+}
+
+void Note_Off()
+{
+    NoteOffTime_mS = HAL_GetTick();
+    IsNoteOn = 0;
 }
 
 void Increase_Note()

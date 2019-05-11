@@ -8,6 +8,8 @@
 #ifndef SIG_GEN_H_
 #define SIG_GEN_H_
 
+#include "stm32f1xx_hal.h"
+
 /**
  * GPIO Definitinos
  */
@@ -34,7 +36,6 @@
 /**
  * Audio Freuquency Definitions
  */
-
 #define G0 (158) /**< ARR for G0 */
 #define A0 (141) /**< ARR for A0 */
 #define B0 (126) /**< ARR for B0 */
@@ -54,13 +55,19 @@
 #define SCALE_LENGTH (15) /**< The number of values in the predefined scale */
 
 #define NUM_SAMPLES (32) /**< Number of analog voltages to calcaulte for each waveform */
-#define AMPLITUDE (600) /**< related to pulse width for PWM signal. Affects analog signal amplitude */
+#define AMPLITUDE (500) /**< related to pulse width for PWM signal. Affects analog signal amplitude */
+
+#define ATTACK_mS (1000)
+#define DECAY_mS (100)
+#define SUSTAIN_mS (500)
+#define RELEASE_mS (1000)
 
 // globals
 int SineBuffer[NUM_SAMPLES]; /**< 32 sample buffer containing sine wave values */
 int TriangleBuffer[NUM_SAMPLES]; /**< 32 sample buffer containing traingle wave values */
 int SquareBuffer[NUM_SAMPLES]; /**< 32 sample buffer containing square wave values */
 int SignalIndex; /**< current index in the waveform buffer */
+
 
 enum SignalType
 {
@@ -71,6 +78,14 @@ enum SignalType
 enum SignalType Selected_Signal;
 
 // function prototypes
+/**
+ * @brief Callback function linked to periodic timer interrupt trigger
+ *
+ * Raises periodic timer flag that tells main loop to update analog voltage level
+ * @param htim handle to periodic timer
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim);
+
 /**
  * @brief calculate the waveform buffers and initialize the timer values
  */
@@ -98,6 +113,9 @@ void Decrease_Note();
 void Update_Output_Signal();
 
 void Change_Selected_Signal();
+
+void Note_On(uint);
+void Note_Off(void);
 
 
 #endif /* SIG_GEN_H_ */
