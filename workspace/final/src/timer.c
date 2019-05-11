@@ -53,7 +53,6 @@ void Initialize_Periodic_Timer()
         Error_Handler();
     }
 
-    HAL_TIM_Base_Start_IT(htimPtr);
 }
 
 
@@ -165,12 +164,6 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef* htim)
         //HAL_NVIC_SetPriority(TIM3_IRQn,0,0);
         //HAL_NVIC_EnableIRQ(TIM3_IRQn);
     }
-}
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
-{
-    // raise flag to change to next signal sample
-    PeriodicTimerFlag = 1;
 }
 
 volatile uint32_t EncoderCount;
