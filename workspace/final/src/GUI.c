@@ -12,6 +12,8 @@
 #include "sig_gen.h"
 #include "graphics_ext.h"
 #include "lcd_driver.h"
+#include "debug_utils.h"
+#include "uart.h"
 
 #define MENU_PAD (8)
 #define MENU_HEIGHT (56)
@@ -32,6 +34,9 @@ void Backward_Menu();
 
 enum Menus { main, synth, oscope };
 enum Menus CurrentMenu = main;
+
+int EncoderState[2] = {0,0};
+int EncoderVal = 0;
 
 void Display_Main_Menu()
 {
@@ -270,5 +275,53 @@ void Display_Waveform_GUI()
      if (GPIO_Pin == BUTTON_LEFT_PIN)
      {
          ButtonLeftTime = HAL_GetTick();
+     }
+
+     if(GPIO_Pin == GPIO_PIN_1) //encoder channel 1 rising edge
+     {
+         uint32_t val1 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_1);
+         uint32_t val2 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2);
+
+         if (val1 != EncoderState[0])
+         {
+             EncoderState[0] = val1;
+
+             if (EncoderState[0] == 0)
+             {
+                 if (val2 == 1)
+                 {
+                     EncoderVal++;
+                 }
+                 else
+                 {
+                     EncoderVal--;
+                 }
+             }
+         }
+         debug_printf(&HUART2,"Encoder val: %d\n\r",EncoderVal);
+     }
+
+     if (GPIO_Pin == GPIO_PIN_2) //encoder channel 1 rising edge
+     {
+         uint32_t val1 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2);
+         uint32_t val2 = HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_1);
+
+          if (val1 != EncoderState[0])
+          {
+              EncoderState[0] = val1;
+
+              if (EncoderState[0] == 0)
+              {
+                  if (val2 == 1)
+                  {
+                      EncoderVal--;
+                  }
+                  else
+                  {
+                      EncoderVal++;
+                  }
+              }
+          }
+          debug_printf(&HUART2,"Encoder val: %d\n\r",EncoderVal);
      }
  }
