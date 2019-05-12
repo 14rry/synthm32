@@ -57,9 +57,15 @@ int main(void)
     ST7735_FillScreen(ST7735_BLACK);
     Display_Main_Menu();
 
+
     while (1)
     {
         Check_GUI_Buttons(HAL_GetTick());
+
+        //GPIO_PinState test = HAL_GPIO_ReadPin(GPIOB, 2);
+        //debug_printf(&HUART2,"Pin value: %d\n\r",test);
+
+
     }
 
 } // end main

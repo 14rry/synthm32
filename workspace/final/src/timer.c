@@ -116,7 +116,7 @@ void Initialize_Encoder_Timer()
         Error_Handler();
     }
 
-    HAL_TIM_Encoder_Start(htimPtr, TIM_CHANNEL_ALL);
+    HAL_TIM_Encoder_Start(htimPtr, TIM_CHANNEL_4);
 }
 
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim)
@@ -149,20 +149,43 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim)
 
 void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef* htim)
 {
+//    // remap
+//    volatile uint32_t map_copy = AFIO->MAPR;
+//
+//    map_copy &= ~((7 << 24) + (3 << 6)); // Clear desired bitfields + debug bits
+//
+//
+//    // 5(101b) shifted left 24 for CoreSight SW-DP (What Keil Ulink2 and St-LinkV2
+//    //use for debugging in either Keil IDE or SW4STM32 IDE)
+//
+//    // The (3 << 10) is me wanting to fully remap the TIM3 AF pins for
+//    //Complementary PWM Generation
+//
+//    map_copy |= (5 << 24) + (3 << 10);
+//
+//    AFIO->MAPR = map_copy;
+//
+//    /* USER CODE END TIM1_MspPostInit 1 */
+
+
     if(htim->Instance == TIM3)
     {
         __HAL_RCC_TIM3_CLK_ENABLE();
-        __HAL_RCC_GPIOA_CLK_ENABLE();
+        //__HAL_RCC_GPIOC_CLK_ENABLE();
+        __HAL_RCC_GPIOB_CLK_ENABLE();
 
         // timer 3 pins are PA6 and PA7
         GPIO_InitTypeDef timer3_IO_init = {0};
-        timer3_IO_init.Pin = GPIO_PIN_6|GPIO_PIN_7;
+        timer3_IO_init.Pin = GPIO_PIN_2|GPIO_PIN_1;
         timer3_IO_init.Mode = GPIO_MODE_INPUT;
         timer3_IO_init.Pull = GPIO_NOPULL;
-        HAL_GPIO_Init(GPIOA, &timer3_IO_init);
+        HAL_GPIO_Init(GPIOB, &timer3_IO_init); // tim3 channel 3
 
-        //HAL_NVIC_SetPriority(TIM3_IRQn,0,0);
-        //HAL_NVIC_EnableIRQ(TIM3_IRQn);
+//        timer3_IO_init.Pin = GPIO_PIN_4;
+//        HAL_GPIO_Init(GPIOB, &timer3_IO_init); // tim3 channel 1
+
+        HAL_NVIC_SetPriority(TIM3_IRQn,0,0);
+        HAL_NVIC_EnableIRQ(TIM3_IRQn);
     }
 }
 

@@ -22,6 +22,7 @@ int MajorScale[15] = {G0,A0,B0,C1,D1,E1,F1,G1,A1,B1,C2,D2,E2,F2,G2};
 uint32_t NoteOnTime_mS = 0;
 uint32_t NoteOffTime_mS = 0;
 int IsNoteOn = 0;
+float EnvelopeMod = 0; // percentage of full amplitude to output
 
 // FUNCTION PROTOTYPES
 int apply_ADSR(int);
@@ -39,6 +40,9 @@ void Initialize_Sig_Gen()
     Selected_Signal = Sine;
 
     SignalIndex = 0;
+    ATTACK_mS = 100;
+    RELEASE_mS = 500;
+    AMPLITUDE_MOD = 80;
 
     // initialize the periodic timer for the first sine note
     __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, SineBuffer[SignalIndex]);
@@ -79,7 +83,7 @@ void Update_Output_Signal()
 
 int apply_ADSR(int amp)
 {
-    float outAmp = (float) amp;
+    float outputAmp = 0;
     if (IsNoteOn == 1)
     {
         uint32_t delta_time_mS = HAL_GetTick() - NoteOnTime_mS;
@@ -87,7 +91,13 @@ int apply_ADSR(int amp)
         if (delta_time_mS < ATTACK_mS)
         {
             // linear slope from 0 to MAX_AMP
-            outAmp = ((float)amp/(float)ATTACK_mS)*(float)delta_time_mS;
+            EnvelopeMod = (float)delta_time_mS/(float)ATTACK_mS;
+            outputAmp = (float)amp*EnvelopeMod;
+        }
+        else
+        {
+            EnvelopeMod = 1;
+            outputAmp = amp;
         }
     }
     else if (IsNoteOn == 0 && NoteOffTime_mS > 0) // note off
@@ -96,28 +106,23 @@ int apply_ADSR(int amp)
 
         if (delta_time_mS < RELEASE_mS)
         {
-            outAmp = ((-(float)amp/(float)RELEASE_mS)*(float)delta_time_mS)+amp;
+            outputAmp = ((-((float)amp*EnvelopeMod)/(float)RELEASE_mS) * (float)delta_time_mS)
+                    +((float)amp*EnvelopeMod);
+
         }
         else
         {
-            outAmp = 0; // release has elapsed, kill output
+            outputAmp = 0; // release has elapsed, kill output
         }
     }
 
-    return (int)outAmp;
+    return (int)(outputAmp*(float)AMPLITUDE_MOD/100.0f);
 }
 
-void Note_On(uint note_val)
+void Note_On(uint noteARR)
 {
-    if (note_val >= SCALE_LENGTH)
-    {
-        return; // note not defined, do nothing
-    }
-
     // change timer frequency to match note_val
-    uint32_t newARR = MajorScale[note_val];
-    __HAL_TIM_SET_AUTORELOAD(&htim_periodic,newARR);
-    //debug_printf(&HUART2, "Changed note to: %d \n\r",newARR);
+    __HAL_TIM_SET_AUTORELOAD(&htim_periodic,noteARR);
 
     // update time for ADSR envelope
     NoteOnTime_mS = HAL_GetTick();

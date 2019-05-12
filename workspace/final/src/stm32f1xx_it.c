@@ -71,10 +71,16 @@ void EXTI15_10_IRQHandler(void)
 
 }
 
-void EXTI2_IRQHandler(void)
+void EXTI1_IRQHandler(void)
 {
-    __HAL_GPIO_EXTI_CLEAR_IT(BUTTON_LEFT_PIN);
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_1);
+}
 
+void EXTI2_IRQHandler(void) // rotary encoder
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2); // only use one channel
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_2);
 }
 
 //void EXTI4_IRQHandler(void)

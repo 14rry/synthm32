@@ -69,8 +69,8 @@ void configure_buttons(void)
     HAL_GPIO_Init(BUTTON_PORT, &GPIO_InitStruct);
 
     // Left button is on different GPIO port
-    GPIO_InitStruct.Pin = BUTTON_LEFT_PIN;
-    HAL_GPIO_Init(BUTTON_LEFT_PORT, &GPIO_InitStruct);
+    //GPIO_InitStruct.Pin = BUTTON_LEFT_PIN;
+    //HAL_GPIO_Init(BUTTON_LEFT_PORT, &GPIO_InitStruct);
 }
 
 void configure_LEDs(void)
@@ -104,14 +104,30 @@ void configure_LEDs(void)
 //    HAL_GPIO_Init(ULED3_PORT, &GPIO_InitStruct);
 }
 
+void configure_encoder()
+{
+    GPIO_InitTypeDef encoder_IO_init = {0};
+    encoder_IO_init.Pin = GPIO_PIN_1|GPIO_PIN_2;
+    encoder_IO_init.Mode = GPIO_MODE_IT_RISING;
+    encoder_IO_init.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOB, &encoder_IO_init); // tim3 channel 3
+
+//    encoder_IO_init.Pin = GPIO_PIN_4;
+//    HAL_GPIO_Init(GPIOC, &encoder_IO_init);
+
+    HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+    HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+}
+
 void GPIO_Init(void)
 {
     __HAL_RCC_GPIOA_CLK_ENABLE();
-    //__HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
 
     configure_buttons();
     //configure_LEDs();
+    configure_encoder();
 
     // Set up interrupts
     HAL_NVIC_SetPriority(EXTI15_10_IRQn,0,0); // blue button, up, right, down
