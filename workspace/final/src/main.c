@@ -57,7 +57,6 @@ int main(void)
     ST7735_FillScreen(ST7735_BLACK);
     Display_Main_Menu();
 
-    uint32_t lastEncoderCount = htim_encoder.Instance->CNT;
 
     while (1)
     {
@@ -66,11 +65,7 @@ int main(void)
         //GPIO_PinState test = HAL_GPIO_ReadPin(GPIOB, 2);
         //debug_printf(&HUART2,"Pin value: %d\n\r",test);
 
-        if (lastEncoderCount != htim_encoder.Instance->CNT)
-        {
-            lastEncoderCount = htim_encoder.Instance->CNT;
-            debug_printf(&HUART2,"Encoder value: %d\n\r",lastEncoderCount);
-        }
+
     }
 
 } // end main

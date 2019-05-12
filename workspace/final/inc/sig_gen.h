@@ -58,11 +58,13 @@
 
 #define NUM_SAMPLES (32) /**< Number of analog voltages to calcaulte for each waveform */
 #define AMPLITUDE (500) /**< related to pulse width for PWM signal. Affects analog signal amplitude */
-
-#define ATTACK_mS (1000)
-#define DECAY_mS (100)
-#define SUSTAIN_mS (500)
-#define RELEASE_mS (1000)
+#define MIN_PARAMETER_TIME (0) /** min time for attack/release */
+#define MAX_PARAMETER_TIME (10000) /** max time for attack/release */
+int ATTACK_mS;
+//#define DECAY_mS = 100;
+//#define SUSTAIN_mS (500)
+int RELEASE_mS;
+int AMPLITUDE_MOD;
 
 // globals
 int SineBuffer[NUM_SAMPLES]; /**< 32 sample buffer containing sine wave values */

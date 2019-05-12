@@ -108,8 +108,3 @@ void TIM4_IRQHandler(void)
     HAL_TIM_IRQHandler(&htim_periodic);
 }
 
-void TIM3_IRQHandler(void)
-{
-    HAL_TIM_IRQHandler(&htim_encoder);
-}
-

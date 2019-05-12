@@ -40,6 +40,9 @@ void Initialize_Sig_Gen()
     Selected_Signal = Sine;
 
     SignalIndex = 0;
+    ATTACK_mS = 100;
+    RELEASE_mS = 500;
+    AMPLITUDE_MOD = 80;
 
     // initialize the periodic timer for the first sine note
     __HAL_TIM_SET_COMPARE(&htim_pwm, TIM_CHANNEL_2, SineBuffer[SignalIndex]);
@@ -113,7 +116,7 @@ int apply_ADSR(int amp)
         }
     }
 
-    return (int)outputAmp;
+    return (int)(outputAmp*(float)AMPLITUDE_MOD/100.0f);
 }
 
 void Note_On(uint noteARR)

@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 #define BUTTON_DELAY_mS (50) /** Button debounce delay in milliseconds */
-
+#define ADJUST_AMOUNT (100) /** Amount to adjust attack/release time */
 
 uint32_t ButtonUpTime; /**< time of interrupt hit */
 uint32_t ButtonDownTime; /**< time of interrupt hit */
